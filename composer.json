@@ -1,0 +1,13 @@
+{
+    "name": "helsingborg-stad/search-notices",
+    "description": "Enables option to add notices to search result of specific keywords",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kristoffer Svanmark",
+            "email": "kristoffer.svanmark@lexiconitkonsult.se"
+        }
+    ],
+    "require": {}
+}
