@@ -6,8 +6,13 @@ class App
 {
     public function __construct()
     {
+        //Basics
         add_action('init', array($this, 'init'));
-        add_action('wp', array($this, 'output'));
+        add_action('loop_start', array($this, 'output'));
+
+        //Integrations
+        add_action('search_notices/print', array($this, 'output'));
+        add_shortcode('search_notices_print', array($this, 'output'));
     }
 
     public function init()
@@ -31,42 +36,64 @@ class App
             return;
         }
 
-        $query = get_search_query();
-        $keywords = preg_split('/(\s|,)/', $query);
+        $keywords           = preg_split('/(\s|,)/', strtolower(get_search_query()));
+        $matchingNotices    = $this->filter(get_field('search_notices', 'option'), $keywords);
 
-        $searchNotices = get_field('search_notices', 'option');
-        $matchingNotices = array();
+        $markup = '';
 
-        foreach ($searchNotices as $notice) {
-            if (!array_intersect(preg_split('/(\s|,)/', $notice['keywords']), $keywords)) {
-                continue;
-            }
-
-            $matchingNotices[] = $notice;
-        }
-
-        add_action('search_notices', function () use ($matchingNotices) {
-            $markup = '<div class="container gutter gutter-lg gutter-vertical"><div class="grid">';
+        if (is_array($matchingNotices) && !empty($matchingNotices)) {
+            $markup .= '<div class="container gutter gutter-lg gutter-vertical"><div class="grid grid-xs-12">';
 
             foreach ($matchingNotices as $notice) {
                 $noticeMarkup = '
-                    <div class="grid-xs-12">
-                        <div class="notice ' . $notice['notice_class'] . '">' . $notice['notice'] . '</div>
-                    </div>
+                        <div class="notice gutter-sm ' . $notice['notice_class'] . '">
+                            <div class="grid no-padding grid-table-md grid-va-middle">
+                                <div class="grid-auto text-left-md text-left-lg">
+                                    '. apply_filters('the_content', $notice['notice']).'
+                                </div>
+                                ' . $this->buttonOutput($notice) .'
+                            </div>
+                        </div>
                 ';
 
                 $markup .= apply_filters('search_notices/markup', $noticeMarkup, $notice);
             }
 
             $markup .= '</div></div>';
+        }
 
-            echo apply_filters('search_notices/output', $markup);
-        });
+        echo apply_filters('search_notices/output', $markup);
+    }
+
+    private function buttonOutput($notice)
+    {
+        $buttonMarkup = "";
+        if ($notice['notice_show_button'] === true) {
+            $buttonMarkup = '
+                <div class="grid-fit-content text-right-md text-right-lg">
+                    <a class="btn btn-primary" href="'.$notice['notice_button_url'].'">'.$notice['notice_button_text'].'</a>
+                </div>
+            ';
+        }
+        return $buttonMarkup;
+    }
+
+    private function filter($searchNotices, $keywords = array())
+    {
+        $matchingNotices = [];
+        foreach ($searchNotices as $notice) {
+            if (!array_intersect(preg_split('/(\s|,)/', strtolower($notice['keywords'])), $keywords)) {
+                continue;
+            }
+
+            $matchingNotices[] = $notice;
+        }
+        return $matchingNotices;
     }
 
     public function fields()
     {
-        if (function_exists('acf_add_local_field_group')) :
+        if (function_exists('acf_add_local_field_group')):
 
             acf_add_local_field_group(array(
                 'key' => 'group_57e2869d5225e',
@@ -156,6 +183,73 @@ class App
                                 'tabs' => 'all',
                                 'toolbar' => 'basic',
                                 'media_upload' => 0,
+                            ),
+                            array(
+                                'key' => 'field_57e3e96c53698',
+                                'label' => 'Show button',
+                                'name' => 'notice_show_button',
+                                'type' => 'true_false',
+                                'instructions' => '',
+                                'required' => 0,
+                                'conditional_logic' => 0,
+                                'wrapper' => array(
+                                    'width' => '',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'message' => '',
+                                'default_value' => 0,
+                            ),
+                            array(
+                                'key' => 'field_57e3e8e46b542',
+                                'label' => 'Button label',
+                                'name' => 'notice_button_text',
+                                'type' => 'text',
+                                'instructions' => '',
+                                'required' => 1,
+                                'conditional_logic' => array(
+                                    array(
+                                        array(
+                                            'field' => 'field_57e3e96c53698',
+                                            'operator' => '==',
+                                            'value' => '1',
+                                        ),
+                                    ),
+                                ),
+                                'wrapper' => array(
+                                    'width' => '50',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'default_value' => '',
+                                'placeholder' => '',
+                                'prepend' => '',
+                                'append' => '',
+                                'maxlength' => '',
+                            ),
+                            array(
+                                'key' => 'field_57e3e90b6b543',
+                                'label' => 'Button url',
+                                'name' => 'notice_button_url',
+                                'type' => 'url',
+                                'instructions' => '',
+                                'required' => 1,
+                                'conditional_logic' => array(
+                                    array(
+                                        array(
+                                            'field' => 'field_57e3e96c53698',
+                                            'operator' => '==',
+                                            'value' => '1',
+                                        ),
+                                    ),
+                                ),
+                                'wrapper' => array(
+                                    'width' => '50',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'default_value' => '',
+                                'placeholder' => '',
                             ),
                         ),
                     ),
