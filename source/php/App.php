@@ -42,7 +42,7 @@ class App
         $markup = '';
 
         if (is_array($matchingNotices) && !empty($matchingNotices)) {
-            $markup .= '<div class="container gutter gutter-lg gutter-vertical"><div class="grid grid-xs-12">';
+            $markup .= '<div class="container gutter gutter-lg gutter-vertical"><div class="grid"><div class="grid-xs-12">';
 
             foreach ($matchingNotices as $notice) {
                 $noticeMarkup = '
@@ -59,7 +59,7 @@ class App
                 $markup .= apply_filters('search_notices/markup', $noticeMarkup, $notice);
             }
 
-            $markup .= '</div></div>';
+            $markup .= '</div></div></div>';
         }
 
         echo apply_filters('search_notices/output', $markup);
