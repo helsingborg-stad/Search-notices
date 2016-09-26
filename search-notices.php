@@ -2,11 +2,11 @@
 
 /**
  * Plugin Name:       Search Notices
- * Plugin URI:        (#plugin_url#)
+ * Plugin URI:        https://github.com/helsingborg-stad/Search-notices
  * Description:       Enables option to add notices to search result of specific keywords
  * Version:           1.0.0
- * Author:            Kristoffer Svanmark
- * Author URI:        (#plugin_author_url#)
+ * Author:            Kristoffer Svanmark @Lexicon IT-Konsult , Sebastian Thulin @Helsingborg stad
+ * Author URI:        https://github.com/helsingborg-stad
  * License:           MIT
  * License URI:       https://opensource.org/licenses/MIT
  * Text Domain:       search-notices
