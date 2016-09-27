@@ -36,6 +36,8 @@ class App
             return;
         }
 
+        global $wp_query;
+
         $keywords           = preg_split('/(\s|,)/', strtolower(get_search_query()));
         $matchingNotices    = $this->filter(get_field('search_notices', 'option'), $keywords);
 
@@ -45,6 +47,10 @@ class App
             $markup .= '<div class="container gutter gutter-lg gutter-vertical"><div class="grid"><div class="grid-xs-12">';
 
             foreach ($matchingNotices as $notice) {
+                if (in_array('empty', (array)$notice['options']) && $wp_query->found_posts > 0) {
+                    continue;
+                }
+
                 $noticeMarkup = '
                         <div class="notice gutter-sm ' . $notice['notice_class'] . '">
                             <div class="grid no-padding grid-table-md grid-va-middle">
@@ -165,6 +171,28 @@ class App
                                 'ajax' => 0,
                                 'return_format' => 'value',
                                 'placeholder' => '',
+                            ),
+                            array(
+                                'key' => 'field_57ea106dedf62',
+                                'label' => 'Options',
+                                'name' => 'options',
+                                'type' => 'checkbox',
+                                'instructions' => '',
+                                'required' => 0,
+                                'conditional_logic' => 0,
+                                'wrapper' => array (
+                                    'width' => '',
+                                    'class' => '',
+                                    'id' => '',
+                                ),
+                                'choices' => array (
+                                    'empty' => 'Only on empty search result',
+                                ),
+                                'default_value' => array (
+                                ),
+                                'layout' => 'horizontal',
+                                'toggle' => 0,
+                                'return_format' => 'value',
                             ),
                             array(
                                 'key' => 'field_57e287517b5b4',
