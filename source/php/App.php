@@ -41,6 +41,10 @@ class App
         $keywords           = preg_split('/(\s|,)/', strtolower(get_search_query()));
         $matchingNotices    = $this->filter(get_field('search_notices', 'option'), $keywords);
 
+        if (!count($keywords)) {
+            return;
+        }
+
         $markup = '';
 
         if (is_array($matchingNotices) && !empty($matchingNotices)) {
