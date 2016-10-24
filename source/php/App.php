@@ -90,14 +90,20 @@ class App
 
     private function filter($searchNotices, $keywords = array())
     {
+        if (!$searchNotices || empty($searchNotices)) {
+            return array();
+        }
+
         $matchingNotices = [];
-        foreach ($searchNotices as $notice) {
+
+        foreach ((array) $searchNotices as $notice) {
             if (!array_intersect(preg_split('/(\s|,)/', strtolower($notice['keywords'])), $keywords)) {
                 continue;
             }
 
             $matchingNotices[] = $notice;
         }
+
         return $matchingNotices;
     }
 
