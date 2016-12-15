@@ -39,7 +39,7 @@ class App
 
         global $wp_query;
 
-        $keywords           = preg_split('/(\s|,)/', strtolower(get_search_query()));
+        $keywords           = preg_split('/(\s|,)/', strtolower(trim(get_search_query())));
         $matchingNotices    = $this->filter(get_field('search_notices', 'option'), $keywords);
 
         if (!count($keywords)) {
