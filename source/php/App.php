@@ -6,18 +6,23 @@ class App
 {
     public function __construct()
     {
-        //Basics
+        // Basics
         add_action('init', array($this, 'init'));
         add_action('loop_start', array($this, 'output'));
 
-        //Integrations
+        // Integrations
         add_action('search_notices/print', array($this, 'output'));
         add_shortcode('search_notices_print', array($this, 'output'));
+
+        if (defined('SEARCH_NOTICES_NETWORK') && SEARCH_NOTICES_NETWORK) {
+            add_action('acf/save_post', array($this, 'clearNoticesCache'), 20);
+        }
     }
 
     public function init()
     {
         $this->fields();
+
         if (function_exists('acf_add_options_page')) {
             acf_add_options_page(array(
                 'page_title' => __('Search notices', 'search-notices'),
@@ -39,8 +44,10 @@ class App
 
         global $wp_query;
 
-        $keywords           = preg_split('/(\s|,)/', strtolower(trim(get_search_query())));
-        $matchingNotices    = $this->filter(get_field('search_notices', 'option'), $keywords);
+        $notices = $this->getNotices();
+        $keywords = preg_split('/(\s|,)/', strtolower(trim(get_search_query())));
+
+        $matchingNotices = $this->filter($notices, $keywords);
 
         if (!count($keywords)) {
             return;
@@ -79,6 +86,7 @@ class App
     private function buttonOutput($notice)
     {
         $buttonMarkup = "";
+
         if ($notice['notice_show_button'] === true) {
             $buttonMarkup = '
                 <div class="grid-fit-content text-right-md text-right-lg">
@@ -86,6 +94,7 @@ class App
                 </div>
             ';
         }
+
         return $buttonMarkup;
     }
 
@@ -108,6 +117,55 @@ class App
         return $matchingNotices;
     }
 
+    /**
+     * Get notices (s)
+     * @return [type] [description]
+     */
+    public function getNotices()
+    {
+        $notices = array();
+
+        // Get notices from all blogs in network
+        if (defined('SEARCH_NOTICES_NETWORK') && SEARCH_NOTICES_NETWORK) {
+            $sites = get_sites();
+
+            if ($cache = wp_cache_get('search-notices-network', 'search-notices')) {
+                return $cache;
+            }
+
+            foreach ($sites as $site) {
+                switch_to_blog($site->blog_id);
+                $notices = array_merge($notices, (array) get_field('search_notices', 'option'));
+                restore_current_blog();
+            }
+
+            wp_cache_add('search-notices-network', $notices, 'search-notices', DAY_IN_SECONDS * 3);
+
+            return $notices;
+        }
+
+        return get_field('search_notices', 'option');
+    }
+
+    /**
+     * Clears the network notices cache when notices are saved
+     * @return void
+     */
+    public function clearNoticesCache()
+    {
+        $screen = get_current_screen();
+
+        if ($screen->id !== 'settings_page_search-notices') {
+            return;
+        }
+
+        wp_cache_delete('search-notices-network', 'search-notices');
+    }
+
+    /**
+     * Sets up the acf fields
+     * @return void
+     */
     public function fields()
     {
         if (function_exists('acf_add_local_field_group')):
