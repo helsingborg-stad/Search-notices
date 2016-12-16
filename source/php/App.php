@@ -60,7 +60,7 @@ class App
                         <div class="notice gutter-sm ' . $notice['notice_class'] . '">
                             <div class="grid no-padding grid-table-md grid-va-middle">
                                 <div class="grid-auto text-left-md text-left-lg">
-                                    '. apply_filters('the_content', $notice['notice']).'
+                                    <p>'. nl2br(strip_tags($notice['notice'], '<a>')) .'</p>
                                 </div>
                                 ' . $this->buttonOutput($notice) .'
                             </div>
@@ -191,15 +191,15 @@ class App
                                 'instructions' => '',
                                 'required' => 0,
                                 'conditional_logic' => 0,
-                                'wrapper' => array (
+                                'wrapper' => array(
                                     'width' => '',
                                     'class' => '',
                                     'id' => '',
                                 ),
-                                'choices' => array (
+                                'choices' => array(
                                     'empty' => 'Only on empty search result',
                                 ),
-                                'default_value' => array (
+                                'default_value' => array(
                                 ),
                                 'layout' => 'horizontal',
                                 'toggle' => 0,
