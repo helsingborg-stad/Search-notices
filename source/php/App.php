@@ -14,8 +14,9 @@ class App
         add_action('search_notices/print', array($this, 'output'));
         add_shortcode('search_notices_print', array($this, 'output'));
 
-        if (defined('SEARCH_NOTICES_NETWORK') && SEARCH_NOTICES_NETWORK) {
+        if (defined('SEARCH_NOTICES_NETWORK') && SEARCH_NOTICES_NETWORK && is_multisite()) {
             add_action('acf/save_post', array($this, 'clearNoticesCache'), 20);
+            add_action('acf/save_post', array($this, 'multisiteSync'));
         }
     }
 
@@ -119,32 +120,18 @@ class App
 
     /**
      * Get notices (s)
-     * @return [type] [description]
+     * @return array
      */
     public function getNotices()
     {
-        $notices = array();
-
-        // Get notices from all blogs in network
-        if (defined('SEARCH_NOTICES_NETWORK') && SEARCH_NOTICES_NETWORK) {
-            $sites = get_sites();
-
-            if ($cache = wp_cache_get('search-notices-network', 'search-notices')) {
-                return $cache;
-            }
-
-            foreach ($sites as $site) {
-                switch_to_blog($site->blog_id);
-                $notices = array_merge($notices, (array) get_field('search_notices', 'option'));
-                restore_current_blog();
-            }
-
-            wp_cache_add('search-notices-network', $notices, 'search-notices', DAY_IN_SECONDS * 3);
-
-            return $notices;
+        if ($cache = wp_cache_get('search-notices-network', 'search-notices')) {
+            return $cache;
         }
 
-        return get_field('search_notices', 'option');
+        $notices = get_field('search_notices', 'option');
+        wp_cache_add('search-notices-network', $notices, 'search-notices', DAY_IN_SECONDS * 3);
+
+        return $notices;
     }
 
     /**
@@ -160,6 +147,33 @@ class App
         }
 
         wp_cache_delete('search-notices-network', 'search-notices');
+    }
+
+    /**
+     * Syncs notices between sites in multisite
+     * @param  string|int $postId Saved post
+     * @return void
+     */
+    public function multisiteSync($postId)
+    {
+        if ($postId != 'options') {
+            return;
+        }
+
+        $screen = get_current_screen();
+        if ($screen->id != 'settings_page_search-notices') {
+            return;
+        }
+
+        $sites = get_sites();
+        $notices = get_field('search_notices', 'options');
+
+        foreach ($sites as $site) {
+            switch_to_blog($site->blog_id);
+            update_field('field_57e286a77b5b1', $notices, 'options');
+        }
+
+        restore_current_blog();
     }
 
     /**
