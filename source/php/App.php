@@ -22,6 +22,8 @@ class App
 
     public function init()
     {
+        wp_cache_add_global_groups('search-notices');
+
         $this->fields();
 
         if (function_exists('acf_add_options_page')) {
@@ -130,7 +132,6 @@ class App
 
         $notices = get_field('search_notices', 'option');
 
-        wp_cache_add_global_groups('search-notices');
         wp_cache_add('search-notices-network', $notices, 'search-notices', DAY_IN_SECONDS * 3);
 
         return $notices;
@@ -148,7 +149,6 @@ class App
             return;
         }
 
-        wp_cache_add_global_groups('search-notices');
         wp_cache_delete('search-notices-network', 'search-notices');
     }
 
