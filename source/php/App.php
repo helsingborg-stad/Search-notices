@@ -41,7 +41,7 @@ class App
 
     public function output()
     {
-        if (!is_search()) {
+        if (!is_search() || is_archive()) {
             return;
         }
 
