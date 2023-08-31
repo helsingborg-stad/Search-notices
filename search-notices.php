@@ -24,14 +24,11 @@ define('SEARCHNOTICES_TEMPLATE_PATH', SEARCHNOTICES_PATH . 'templates/');
 
 load_plugin_textdomain('search-notices', false, plugin_basename(dirname(__FILE__)) . '/languages');
 
-require_once SEARCHNOTICES_PATH . 'source/php/Vendor/Psr4ClassLoader.php';
+// Autoload from plugin
+if (file_exists(SEARCHNOTICES_PATH . 'vendor/autoload.php')) {
+    require_once SEARCHNOTICES_PATH . 'vendor/autoload.php';
+}
 require_once SEARCHNOTICES_PATH . 'Public.php';
-
-// Instantiate and register the autoloader
-$loader = new SearchNotices\Vendor\Psr4ClassLoader();
-$loader->addPrefix('SearchNotices', SEARCHNOTICES_PATH);
-$loader->addPrefix('SearchNotices', SEARCHNOTICES_PATH . 'source/php/');
-$loader->register();
 
 // Start application
 new SearchNotices\App();
