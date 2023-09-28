@@ -1,6 +1,6 @@
 {
     "name": "search-notices",
-    "version": "2.0.0",
+    "version": "3.0.2",
     "description": "Enables option to add notices to search result of specific keywords",
     "main": "",
     "scripts": {
