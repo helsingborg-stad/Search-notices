@@ -4,7 +4,7 @@
  * Plugin Name:       Search Notices
  * Plugin URI:        https://github.com/helsingborg-stad/Search-notices
  * Description:       Enables option to add notices to search result of specific keywords
- * Version: 3.0.2
+ * Version: 3.0.3
  * Author:            Kristoffer Svanmark @Lexicon IT-Konsult , Sebastian Thulin @Helsingborg stad
  * Author URI:        https://github.com/helsingborg-stad
  * License:           MIT
